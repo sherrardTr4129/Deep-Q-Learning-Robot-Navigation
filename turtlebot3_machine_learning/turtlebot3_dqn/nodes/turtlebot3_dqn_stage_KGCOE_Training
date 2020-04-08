@@ -29,8 +29,8 @@ from collections import deque
 from std_msgs.msg import Float32MultiArray
 from src.turtlebot3_dqn.environment_stage_KCGOE_Training import Env
 from keras.models import Sequential, load_model
-from keras.optimizers import RMSprop
-from keras.layers import Dense, Dropout, Activation, Conv1D, MaxPooling1D, Flatten, Reshape
+from keras.optimizers import Adam
+from keras.layers import Dense, Dropout, Activation
 
 
 EPISODES = 2000
@@ -71,16 +71,24 @@ class ReinforceAgent():
 
     def buildModel(self):
         model = Sequential()
-        dropout = 0.2
+        dropout1 = 0.1
+        dropout2 = 0.1
+        dropout3 = 0.2
 
-        model.add(Dense(64, input_shape=(self.state_size,), activation='relu', kernel_initializer='lecun_uniform'))
+        model.add(Dense(64, input_shape=(self.state_size,), activation='tanh', kernel_initializer='he_uniform'))
 
-        model.add(Dense(64, activation='relu', kernel_initializer='lecun_uniform'))
-        model.add(Dropout(dropout))
+        model.add(Dense(128, activation='relu', kernel_initializer='he_uniform'))
+        model.add(Dropout(dropout1))
 
-        model.add(Dense(self.action_size, kernel_initializer='lecun_uniform'))
+        model.add(Dense(128, activation='relu', kernel_initializer='he_uniform'))
+        model.add(Dropout(dropout2))
+
+        model.add(Dense(64, activation='sigmoid', kernel_initializer='he_uniform'))
+        model.add(Dropout(dropout3))
+
+        model.add(Dense(self.action_size, kernel_initializer='he_uniform'))
         model.add(Activation('linear'))
-        model.compile(loss='mse', optimizer=RMSprop(lr=self.learning_rate, rho=0.9, epsilon=1e-06))
+        model.compile(loss='mae', optimizer=Adam(lr=self.learning_rate))
         model.summary()
 
         return model
