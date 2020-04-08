@@ -1,5 +1,5 @@
 <launch>
-  <arg name="stage" default="6"/>
+  <arg name="stage" default="7"/>
   <param name="stage_number"  value="$(arg stage)"/>
   <node pkg="turtlebot3_dqn" type="turtlebot3_dqn_stage_KGCOE_Testing" name="turtlebot3_dqn_stage_KGCOE_Testing" output="screen" />
 </launch>

@@ -91,7 +91,7 @@ class Env():
 
     def setReward(self, state, done, action):
         runningTotal = 0
-        punishmentStep = 0.2
+        punishmentStep = 0.1
         current_distance = state[-1]
         heading = state[-2]
 
@@ -100,7 +100,7 @@ class Env():
             if(elem < 0.3):
                 runningTotal += punishmentStep
 
-        reward = -runningTotal - current_distance
+        reward = -runningTotal - (current_distance * 2)
 
         if done:
             rospy.loginfo("Collision!!")

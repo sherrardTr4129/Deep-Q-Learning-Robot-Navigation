@@ -34,7 +34,7 @@ class Respawn():
         self.model = self.f.read()
         self.stage = rospy.get_param('/stage_number')
         self.goal_position = Pose()
-        self.init_goal_x = 0.3
+        self.init_goal_x = 0.6
         self.init_goal_y = 0.0
         self.goal_position.position.x = self.init_goal_x
         self.goal_position.position.y = self.init_goal_y
@@ -82,7 +82,7 @@ class Respawn():
         if delete:
             self.deleteModel()
 
-        if self.stage != 4 and self.stage != 5 and self.stage != 6:
+        if self.stage < 4:
             while position_check:
                 goal_x = random.randrange(-12, 13) / 10.0
                 goal_y = random.randrange(-12, 13) / 10.0
@@ -105,7 +105,7 @@ class Respawn():
                 self.goal_position.position.x = goal_x
                 self.goal_position.position.y = goal_y
 
-        elif self.stage == 4:
+        elif self.stage == 4 or self.stage == 5:
             while position_check:
                 goal_x_list = [0.6, 1.9, 0.5, 0.2, -0.8, -1, -1.9, 0.5, 2, 0.5, 0, -0.1, -2]
                 goal_y_list = [0, -0.5, -1.9, 1.5, -0.9, 1, 1.1, -1.5, 1.5, 1.8, -1, 1.6, -0.8]
@@ -121,7 +121,7 @@ class Respawn():
                 self.goal_position.position.x = goal_x_list[self.index]
                 self.goal_position.position.y = goal_y_list[self.index]
 
-        elif self.stage == 5:
+        elif self.stage == 6:
             while position_check:
                 goal_x_list = [4,   7,  7, 1, 1, 7, 9, 11, 12, 12, 13, 13, 14]
                 goal_y_list = [-3, -3, -2, 3, 4, 0, 0, 0, -2,  3,  4, 2.5, 3.6]
@@ -137,7 +137,7 @@ class Respawn():
                 self.goal_position.position.x = goal_x_list[self.index]
                 self.goal_position.position.y = goal_y_list[self.index]
 
-        elif self.stage == 6:
+        elif self.stage == 7:
             while position_check:
                 goal_x_list = [4,   3,  23, 13, 15, 9, 23, 11, 3, -12, -4, 3, 5]
                 goal_y_list = [-3, -4, -6, 3, 3.5, 0, 4, 2, -4,  -1,  4, -17, -4]
