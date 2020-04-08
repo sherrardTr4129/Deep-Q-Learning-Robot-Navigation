@@ -148,7 +148,7 @@ if __name__ == '__main__':
     result = Float32MultiArray()
     get_action = Float32MultiArray()
 
-    state_size = 362
+    state_size = 364 # 360 for scan points, 1 for reward, 1 for action taken, 1 rotational vel, 1 for lin vel
     action_size = 5
 
     env = Env(action_size)

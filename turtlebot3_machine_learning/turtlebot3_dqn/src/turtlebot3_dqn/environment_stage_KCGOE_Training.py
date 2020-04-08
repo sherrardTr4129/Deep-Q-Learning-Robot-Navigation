@@ -66,7 +66,7 @@ class Env():
 
         self.heading = round(heading, 2)
 
-    def getState(self, scan):
+    def getState(self, scan, cmdVel):
         scan_range = []
         heading = self.heading
         min_range = 0.13
@@ -87,20 +87,27 @@ class Env():
         if current_distance < 0.2:
             self.get_goalbox = True
 
-        return scan_range + [heading, current_distance], done
+        return scan_range + [cmdVel.linear.x, cmdVel.angular.z] + [heading, current_distance], done
 
     def setReward(self, state, done, action):
         runningTotal = 0
         punishmentStep = 0.1
+        speedPunish = 0
+
         current_distance = state[-1]
         heading = state[-2]
-
+        angSpeed = state[-3]
+        linSpeed = state[-4]
         laserScanPoints = state[0:360]
+
         for elem in laserScanPoints:
             if(elem < 0.3):
                 runningTotal += punishmentStep
 
-        reward = -runningTotal - (current_distance * 2)
+        if(linSpeed > 2.5 and abs(angSpeed) > 1.1):
+            speedPunish = -5
+
+        reward = -runningTotal - (current_distance * 2) - speedPunish
 
         if done:
             rospy.loginfo("Collision!!")
@@ -133,7 +140,7 @@ class Env():
             except:
                 pass
 
-        state, done = self.getState(data)
+        state, done = self.getState(data, vel_cmd)
         reward = self.setReward(state, done, action)
 
         return np.asarray(state), reward, done
@@ -146,17 +153,19 @@ class Env():
             print("gazebo/reset_simulation service call failed")
 
         data = None
+        velData = None
         while data is None:
             try:
                 data = rospy.wait_for_message('scan', LaserScan, timeout=5)
+                velData = rospy.wait_for_message('cmd_vel', Twist, timeout=5)
             except:
-                pass
+                velData = Twist()
 
         if self.initGoal:
             self.goal_x, self.goal_y = self.respawn_goal.getPosition()
             self.initGoal = False
 
         self.goal_distance = self.getGoalDistace()
-        state, done = self.getState(data)
+        state, done = self.getState(data, velData)
 
         return np.asarray(state)

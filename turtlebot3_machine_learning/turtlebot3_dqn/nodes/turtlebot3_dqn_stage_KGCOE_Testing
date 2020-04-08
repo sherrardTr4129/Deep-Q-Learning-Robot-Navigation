@@ -150,7 +150,7 @@ if __name__ == '__main__':
     result = Float32MultiArray()
     get_action = Float32MultiArray()
 
-    state_size = 26
+    state_size = 364 # 360 for scan points, 1 for reward, 1 for action taken, 1 rotational vel, 1 for lin vel
     action_size = 5
 
     env = Env(action_size)
@@ -168,6 +168,7 @@ if __name__ == '__main__':
             action = agent.getAction(state)
 
             next_state, reward, done = env.step(action)
+            print(reward)
 
             agent.appendMemory(state, action, reward, next_state, done)
 
