@@ -27,6 +27,8 @@ from nav_msgs.msg import Odometry
 from std_srvs.srv import Empty
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 from respawnGoal import Respawn
+global numTurns
+numTurns = 0
 
 class Env():
     def __init__(self, action_size):
@@ -90,9 +92,12 @@ class Env():
         return scan_range + [cmdVel.linear.x, cmdVel.angular.z] + [heading, current_distance], done
 
     def setReward(self, state, done, action):
+        global numTurns
         runningTotal = 0
-        punishmentStep = 0.1
+        punishmentStep = 0.12
         speedPunish = 0
+        spinPunish = 0
+        spinPunishStep = 5
 
         current_distance = state[-1]
         heading = state[-2]
@@ -104,23 +109,28 @@ class Env():
             if(elem < 0.3):
                 runningTotal += punishmentStep
 
-        if(linSpeed > 2.5 and abs(angSpeed) > 1.1):
-            speedPunish = -5
+        if(abs(angSpeed) > 2.2):
+            numTurns += 1
 
-        reward = -runningTotal - (current_distance * 2) - speedPunish
+        if(numTurns > 10):
+            spinPunish = spinPunishStep
+
+        reward = -runningTotal - (current_distance * 3) - speedPunish - spinPunish
 
         if done:
             rospy.loginfo("Collision!!")
-            reward = -200
+            reward = -300
             self.pub_cmd_vel.publish(Twist())
+            numTurns = 0
 
         if self.get_goalbox:
             rospy.loginfo("Goal!!")
-            reward = 200
+            reward = 300
             self.pub_cmd_vel.publish(Twist())
             self.goal_x, self.goal_y = self.respawn_goal.getPosition(True, delete=True)
             self.goal_distance = self.getGoalDistace()
             self.get_goalbox = False
+            numTurns = 0
 
         return reward
 
