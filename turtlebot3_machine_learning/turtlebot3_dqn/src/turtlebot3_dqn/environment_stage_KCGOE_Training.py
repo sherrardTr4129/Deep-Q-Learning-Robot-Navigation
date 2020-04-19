@@ -94,10 +94,11 @@ class Env():
     def setReward(self, state, done, action):
         global numTurns
         runningTotal = 0
-        punishmentStep = 0.12
+        punishmentStep = 0.05
         speedPunish = 0
         spinPunish = 0
         spinPunishStep = 5
+        distancePunishFactor = 4
 
         current_distance = state[-1]
         heading = state[-2]
@@ -109,13 +110,15 @@ class Env():
             if(elem < 0.3):
                 runningTotal += punishmentStep
 
-        if(abs(angSpeed) > 2.2):
+        if(abs(angSpeed) > 1.3):
             numTurns += 1
 
-        if(numTurns > 10):
+        if(numTurns > 15):
             spinPunish = spinPunishStep
+            # reset numTurns
+            numTurns = 0
 
-        reward = -runningTotal - (current_distance * 3) - speedPunish - spinPunish
+        reward = -runningTotal - (current_distance * distancePunishFactor) - speedPunish - spinPunish
 
         if done:
             rospy.loginfo("Collision!!")
@@ -135,11 +138,11 @@ class Env():
         return reward
 
     def step(self, action):
-        max_angular_vel = 2.5
+        max_angular_vel = 1.5
         ang_vel = ((self.action_size - 1)/2 - action) * max_angular_vel * 0.5
 
         vel_cmd = Twist()
-        vel_cmd.linear.x = 0.30
+        vel_cmd.linear.x = 0.20
         vel_cmd.angular.z = ang_vel
         self.pub_cmd_vel.publish(vel_cmd)
 
