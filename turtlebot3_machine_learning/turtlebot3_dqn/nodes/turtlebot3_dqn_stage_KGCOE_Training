@@ -71,19 +71,19 @@ class ReinforceAgent():
 
     def buildModel(self):
         model = Sequential()
-        dropout1 = 0.1
-        dropout2 = 0.1
+        dropout1 = 0.2
+        dropout2 = 0.2
         dropout3 = 0.2
 
-        model.add(Dense(64, input_shape=(self.state_size,), activation='tanh', kernel_initializer='he_uniform'))
+        model.add(Dense(200, input_shape=(self.state_size,), activation='relu', kernel_initializer='he_uniform'))
 
-        model.add(Dense(128, activation='relu', kernel_initializer='he_uniform'))
+        model.add(Dense(200, activation='relu', kernel_initializer='he_uniform'))
         model.add(Dropout(dropout1))
 
-        model.add(Dense(128, activation='relu', kernel_initializer='he_uniform'))
+        model.add(Dense(200, activation='relu', kernel_initializer='he_uniform'))
         model.add(Dropout(dropout2))
 
-        model.add(Dense(64, activation='sigmoid', kernel_initializer='he_uniform'))
+        model.add(Dense(200, activation='relu', kernel_initializer='he_uniform'))
         model.add(Dropout(dropout3))
 
         model.add(Dense(self.action_size, kernel_initializer='he_uniform'))
