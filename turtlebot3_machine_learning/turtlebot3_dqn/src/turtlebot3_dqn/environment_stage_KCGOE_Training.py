@@ -113,7 +113,7 @@ class Env():
         if(abs(angSpeed) > 1.3):
             numTurns += 1
 
-        if(numTurns > 15):
+        if(numTurns > 30):
             spinPunish = spinPunishStep
             # reset numTurns
             numTurns = 0
@@ -122,13 +122,13 @@ class Env():
 
         if done:
             rospy.loginfo("Collision!!")
-            reward = -300
+            reward = -200
             self.pub_cmd_vel.publish(Twist())
             numTurns = 0
 
         if self.get_goalbox:
             rospy.loginfo("Goal!!")
-            reward = 300
+            reward = 200
             self.pub_cmd_vel.publish(Twist())
             self.goal_x, self.goal_y = self.respawn_goal.getPosition(True, delete=True)
             self.goal_distance = self.getGoalDistace()
