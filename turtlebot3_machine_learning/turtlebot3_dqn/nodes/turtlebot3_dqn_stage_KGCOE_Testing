@@ -73,8 +73,8 @@ class ReinforceAgent():
 
     def buildModel(self):
         model = Sequential()
-        dropout1 = 0.2
-        dropout2 = 0.2
+        dropout1 = 0.1
+        dropout2 = 0.1
         dropout3 = 0.2
 
         model.add(Dense(200, input_shape=(self.state_size,), activation='relu', kernel_initializer='he_uniform'))
@@ -90,7 +90,7 @@ class ReinforceAgent():
 
         model.add(Dense(self.action_size, kernel_initializer='he_uniform'))
         model.add(Activation('linear'))
-        model.compile(loss='mae', optimizer=Adam(lr=self.learning_rate))
+        model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate))
         model.summary()
 
         return model
