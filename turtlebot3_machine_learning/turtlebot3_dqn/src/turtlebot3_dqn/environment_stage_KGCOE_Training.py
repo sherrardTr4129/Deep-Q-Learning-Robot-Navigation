@@ -47,11 +47,32 @@ class Env():
         self.respawn_goal = Respawn()
 
     def getGoalDistace(self):
+        """
+        This function computes the euclidean distance from the agent's
+        current position to the goal state.
+
+        params:
+            self
+
+        returns:
+            distance (float): the distance to the goal state from the current state
+        """
         goal_distance = round(math.hypot(self.goal_x - self.position.x, self.goal_y - self.position.y), 2)
 
         return goal_distance
 
     def getOdometry(self, odom):
+        """
+        This function computes the overall heading of the agent from recieved odom
+        messages, and updates the env object heading field with that value.
+
+        params:
+            self
+            odom (Odometry ROS message): the recieved ROS odometry message
+
+        returns:
+            None
+        """
         self.position = odom.pose.pose.position
         orientation = odom.pose.pose.orientation
         orientation_list = [orientation.x, orientation.y, orientation.z, orientation.w]
@@ -69,6 +90,20 @@ class Env():
         self.heading = round(heading, 2)
 
     def getState(self, scan, cmdVel):
+        """
+        This function updates the env object with current information about the state
+        of the agent within the enviornment. This function also detects if a collision has occured
+        or if the agent has reached the goal state.
+
+        params:
+            self
+            scan (ROS LaserScan Message): The recieved ROS laser scan message from the TurtleBot3 Lidar
+            cmdVel (ROS Twist Message): The recieved Twist message containing target velocities for
+            the TurtleBot3 agent.
+
+        returns:
+            A list of various state variables
+        """
         scan_range = []
         heading = self.heading
         min_range = 0.13
@@ -92,6 +127,18 @@ class Env():
         return scan_range + [cmdVel.linear.x, cmdVel.angular.z] + [heading, current_distance], done
 
     def setReward(self, state, done, action):
+        """
+        This function computes the overal reward incurred by the agent in a given time step.
+
+        params:
+            self
+            state (list of various types): The list of state variables generated in the above function
+            done (Boolean): A boolean indicating a collision
+            action (int): An integer corresponding to the action taken in the given time step
+
+        returns:
+            reward (float): The computed reward value
+        """
         global numTurns
         runningTotal = 0
         punishmentStep = 0.05
@@ -138,6 +185,20 @@ class Env():
         return reward
 
     def step(self, action):
+        """
+        This function computes and publisher the overall Twist message values based off of the
+        action recieved from the model. This function then uses the above functions to compute
+        the current state and reward after the given action is completed.
+
+        params:
+            self
+            action (int): An integer indicating what action the agent should take in the
+                          given time step.
+
+        returns:
+            A list of various types containing compute state variables, the reward for
+            a given action, and the status of a collision.
+        """
         max_angular_vel = 1.5
         ang_vel = ((self.action_size - 1)/2 - action) * max_angular_vel * 0.5
 
@@ -159,6 +220,16 @@ class Env():
         return np.asarray(state), reward, done
 
     def reset(self):
+        """
+        This function resets the current simulation enviornment and all associate enviornment
+        state variables.
+
+        params:
+            self
+
+        returns:
+            A list of various types containing various state variables
+        """
         rospy.wait_for_service('gazebo/reset_simulation')
         try:
             self.reset_proxy()

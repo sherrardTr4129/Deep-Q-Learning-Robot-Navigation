@@ -37,6 +37,19 @@ EPISODES = 3000
 
 class ReinforceAgent():
     def __init__(self, state_size, action_size):
+        """
+        This function serves as the constructor for the Reinforcement Agent class
+
+        params:
+            self
+            state_size (int): An integer representing the total size of the
+                              list containing state variables.
+            action_size (int): An integer representing the total number of
+                               actions that the agent can take.
+
+        returns:
+            None
+        """
         self.pub_result = rospy.Publisher('result', Float32MultiArray, queue_size=5)
         self.dirPath = os.path.dirname(os.path.realpath(__file__))
         self.dirPath = self.dirPath.replace('turtlebot3_dqn/nodes', 'turtlebot3_dqn/save_model/stage_5_')
@@ -70,6 +83,16 @@ class ReinforceAgent():
                 self.epsilon = param.get('epsilon')
 
     def buildModel(self):
+        """
+        This function constructs the overall deep learning model through the use
+        of the Keras TensorFlow API.
+
+        params:
+            self
+
+        returns:
+            model (TensorFlow model instance): The instance of the generated model
+        """
         model = Sequential()
         dropout1 = 0.1
         dropout2 = 0.1
@@ -94,15 +117,48 @@ class ReinforceAgent():
         return model
 
     def getQvalue(self, reward, next_target, done):
+        """
+        This function computes the overall Q-function value given the next target
+        and the reward obtained from the previous time step.
+
+        params:
+            self
+            reward (float): The computed reward from the previous time step
+            next_target (int): The next action to be taken as predicted by the model
+            done (boolean): A boolean indicating the status of a collision
+
+        returns:
+            The computed Q-Function value
+        """
         if done:
             return reward
         else:
             return reward + self.discount_factor * np.amax(next_target)
 
     def updateTargetModel(self):
+        """
+        This function updates the target model with the current model weights
+
+        params:
+            self
+
+        returns:
+            None
+        """
         self.target_model.set_weights(self.model.get_weights())
 
     def getAction(self, state):
+        """
+        This function predicts the appropriate action for the agent to take
+        given the current enviornment state information.
+
+        params:
+            self
+            state (list of various types): A list containing various state variables
+
+        returns:
+            expected Q function value obtained from taken the predicted action.
+        """
         if np.random.rand() <= self.epsilon:
             self.q_value = np.zeros(self.action_size)
             return random.randrange(self.action_size)
@@ -112,9 +168,35 @@ class ReinforceAgent():
             return np.argmax(q_value[0])
 
     def appendMemory(self, state, action, reward, next_state, done):
+        """
+        This function appends all state variables, computed reward and taken action
+        from a given time step into the agent's memory.
+
+        params:
+            self
+            state (list of various types): A list of various state variables
+            action (int): The action taken
+            reward (float): The computed reward value
+            next_state (int): The next appropriate action to take as predicted
+                              by the model.
+            done (boolean): A boolean indicating the presence of a collision
+        """
         self.memory.append((state, action, reward, next_state, done))
 
     def trainModel(self, target=False):
+        """
+        This function takes the computed state variables from a given action taken,
+        and the recieved reward and Q-Function value and trains the overall model with
+        both vectors.
+
+        params:
+            self
+            target (boolean): A boolean indicating that the target model should be updated if
+                              this is set to true
+
+        returns:
+            None
+        """
         mini_batch = random.sample(self.memory, self.batch_size)
         X_batch = np.empty((0, self.state_size), dtype=np.float64)
         Y_batch = np.empty((0, self.action_size), dtype=np.float64)
@@ -157,7 +239,7 @@ if __name__ == '__main__':
     get_action = Float32MultiArray()
 
     state_size = 364 # 360 for scan points, 1 for reward, 1 for action taken, 1 rotational vel, 1 for lin vel
-    action_size = 5
+    action_size = 5 # 5 available actions for the agent to take
 
     env = Env(action_size)
 

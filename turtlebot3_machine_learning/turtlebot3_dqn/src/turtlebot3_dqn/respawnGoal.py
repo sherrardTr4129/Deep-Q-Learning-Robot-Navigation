@@ -79,6 +79,20 @@ class Respawn():
                 pass
 
     def getPosition(self, position_check=False, delete=False):
+        """
+        This function generates a new goal (x,y) location by randomly indexing into a
+        list of valid goal states for a given stage.
+
+        params:
+            self
+            position_check (Boolean): A boolean indicating whether or not the function
+                                      will perform additional error checking on the generated
+                                      (x,y) goal state.
+            delete (Boolean): A boolean that will set the model to be deleted if set to True
+
+        returns:
+           A touple of integers corresponding to the new (x,y) goal position
+        """
         if delete:
             self.deleteModel()
 
